@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Array Tools</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+  <style>
+    /* Global styles */
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    /* Container styles */
+    .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    /* Heading styles */
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #333333;
+    }
+
+    /* Input group styles */
+    .input-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .input-group label {
+      font-weight: bold;
+      color: #555555;
+      width: 120px;
+    }
+
+    .input-group input {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #cccccc;
+      border-radius: 4px;
+      transition: border-color 0.3s ease;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 14px;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: #4caf50;
+    }
+
+    /* Button group styles */
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .button-group button {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 14px;
+    }
+
+    .button-group button:hover {
+      background-color: #45a049;
+    }
+
+    .button-group button:last-child {
+      background-color: #f44336;
+    }
+
+    .button-group button[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    @media screen and (max-width: 480px) {
+      .button-group {
+        flex-direction: column;
+      }
+    }
+
+    /* Result and error styles */
+    .result,
+    .error {
+      font-weight: bold;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 14px;
+    }
+
+    .result {
+      background-color: #dff0d8;
+      color: #3c763d;
+    }
+
+    .error {
+      background-color: #f2dede;
+      color: #a94442;
+    }
+
+    /* Additional styles */
+    p {
+      margin-bottom: 5px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    p.disclaimer {
+      margin-top: 20px;
+      color: #777777;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    /* Code block styles */
+    code {
+      background-color: #f5f5f5;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Array Tools</h1>
+
+    <div class="input-group">
+      <label for="nums">Enter an array:</label>
+      <input type="text" id="nums" placeholder="e.g., [1, 2, 3]" autofocus>
+    </div>
+
+    <div class="button-group">
+      <button id="getLastBtn">Get Last Element</button>
+      <button id="getMaxBtn">Get Max Element</button>
+      <button id="getSumBtn">Get Sum</button>
+      <button id="getAverageBtn">Get Average</button>
+      <button id="clearBtn" style="background-color: #eaeaea; color: #333;">Clear</button>
+      <button id="sortBtn">Sort</button>
+      <button id="searchBtn">Search</button>
+      <button id="filterBtn">Filter</button>
+    </div>
+
+    <div id="result"></div>
+    <div id="error"></div>
+  </div>
+
+  <script>
+    const numsInput = document.getElementById('nums');
+    const resultElement = document.getElementById('result');
+    const errorElement = document.getElementById('error');
+    const getLastBtn = document.getElementById('getLastBtn');
+    const getMaxBtn = document.getElementById('getMaxBtn');
+    const getSumBtn = document.getElementById('getSumBtn');
+    const getAverageBtn = document.getElementById('getAverageBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const sortBtn = document.getElementById('sortBtn');
+    const searchBtn = document.getElementById('searchBtn');
+    const filterBtn = document.getElementById('filterBtn');
+
+    // Add event listeners
+    getLastBtn.addEventListener('click', getLastElement);
+    getMaxBtn.addEventListener('click', getMaxElement);
+    getSumBtn.addEventListener('click', getSum);
+    getAverageBtn.addEventListener('click', getAverage);
+    clearBtn.addEventListener('click', clearInput);
+    sortBtn.addEventListener('click', sortArray);
+    searchBtn.addEventListener('click', searchArray);
+    filterBtn.addEventListener('click', filterArray);
+
+    // Undo/Redo variables
+    const actionStack = [];
+    let currentIndex = -1;
+
+    function getLastElement() {
+      performAction(getLastElementAction);
+    }
+
+    function getMaxElement() {
+      performAction(getMaxElementAction);
+    }
+
+    function getSum() {
+      performAction(getSumAction);
+    }
+
+    function getAverage() {
+      performAction(getAverageAction);
+    }
+
+    function sortArray() {
+      performAction(sortArrayAction);
+    }
+
+    function searchArray() {
+      performAction(searchArrayAction);
+    }
+
+    function filterArray() {
+      performAction(filterArrayAction);
+    }
+
+    function performAction(action) {
+      disableButtons();
+      clearMessages();
+
+      try {
+        const nums = parseInput();
+
+        if (!Array.isArray(nums)) {
+          throw new Error('Invalid input. Please enter an array in the format [element1, element2, ...]');
+        }
+
+        const result = action(nums);
+        displayResult(result);
+        addToActionStack(action, nums);
+      } catch (error) {
+        displayError(error.message);
+        clearInput();
+      } finally {
+        enableButtons();
+      }
+    }
+
+    function undo() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        const {action, nums} = actionStack[currentIndex];
+        const result = action(nums);
+        displayResult(result);
+      }
+    }
+
+    function redo() {
+      if (currentIndex < actionStack.length - 1) {
+        currentIndex++;
+        const {action, nums} = actionStack[currentIndex];
+        const result = action(nums);
+        displayResult(result);
+      }
+    }
+
+    function addToActionStack(action, nums) {
+      currentIndex++;
+      actionStack.splice(currentIndex);
+      actionStack.push({action, nums});
+    }
+
+    function clearActionStack() {
+      actionStack.length = 0;
+      currentIndex = -1;
+    }
+
+    function disableButtons() {
+      getLastBtn.disabled = true;
+      getMaxBtn.disabled = true;
+      getSumBtn.disabled = true;
+      getAverageBtn.disabled = true;
+      clearBtn.disabled = true;
+      sortBtn.disabled = true;
+      searchBtn.disabled = true;
+      filterBtn.disabled = true;
+    }
+
+    function enableButtons() {
+      getLastBtn.disabled = false;
+      getMaxBtn.disabled = false;
+      getSumBtn.disabled = false;
+      getAverageBtn.disabled = false;
+      clearBtn.disabled = false;
+      sortBtn.disabled = false;
+      searchBtn.disabled = false;
+      filterBtn.disabled = false;
+    }
+
+    function getLastElementAction(nums) {
+      if (nums.length === 0) {
+        throw new Error('The array is empty. No last element to retrieve.');
+      }
+      const lastElement = nums.last();
+      return `Last element: ${lastElement}`;
+    }
+
+    function getMaxElementAction(nums) {
+      if (nums.length === 0) {
+        throw new Error('The array is empty. No maximum element to retrieve.');
+      }
+      const maxElement = nums.max();
+      return `Maximum element: ${maxElement}`;
+    }
+
+    function getSumAction(nums) {
+      const sum = nums.sum();
+      return `Sum: ${sum}`;
+    }
+
+    function getAverageAction(nums) {
+      const average = nums.average();
+      return `Average: ${average}`;
+    }
+
+    function sortArrayAction(nums) {
+      const sortedArray = nums.slice().sort();
+      return `Sorted Array: ${JSON.stringify(sortedArray)}`;
+    }
+
+    function searchArrayAction(nums) {
+      const searchValue = prompt('Enter a value to search:');
+      const index = nums.indexOf(searchValue);
+      if (index === -1) {
+        return 'Value not found in the array.';
+      } else {
+        return `Value found at index ${index}.`;
+      }
+    }
+
+    function filterArrayAction(nums) {
+      const filterValue = prompt('Enter a value to filter:');
+      const filteredArray = nums.filter((element) => element === filterValue);
+      return `Filtered Array: ${JSON.stringify(filteredArray)}`;
+    }
+
+    // Define undo and redo actions
+    function undoAction() {
+      undo();
+    }
+
+    function redoAction() {
+      redo();
+    }
+
+    // Add undo/redo event listeners
+document.addEventListener('keydown', function (event) {
+  if (event.ctrlKey && event.keyCode === 90) { // Ctrl + Z (undo)
+    event.preventDefault();
+    undoAction();
+  } else if (event.ctrlKey && event.keyCode === 89) { // Ctrl + Y (redo)
+    event.preventDefault();
+    redoAction();
+  }
+});
+
+
+    function clearInput() {
+      numsInput.value = '';
+      clearMessages();
+    }
+
+    function parseInput() {
+      const input = numsInput.value.trim();
+      if (!input.startsWith('[') || !input.endsWith(']')) {
+        throw new Error('Invalid input format. Please enter an array in the format [element1, element2, ...]');
+      }
+
+      try {
+        const nums = JSON.parse(input);
+        return nums;
+      } catch {
+        throw new Error('Invalid input. Please enter a valid JSON array.');
+      }
+    }
+
+    function displayResult(message) {
+      resultElement.innerHTML = `<div class="result">${message}</div>`;
+    }
+
+    function displayError(message) {
+      errorElement.innerHTML = `<div class="error">${message}</div>`;
+    }
+
+    function clearMessages() {
+      resultElement.innerHTML = '';
+      errorElement.innerHTML = '';
+    }
+
+    Array.prototype.last = function () {
+      if (this.length === 0) {
+        return -1;
+      }
+      return this[this.length - 1];
+    };
+
+    Array.prototype.max = function () {
+      if (this.length === 0) {
+        return -1;
+      }
+      return Math.max(...this);
+    };
+
+    Array.prototype.sum = function () {
+      if (this.length === 0) {
+        return 0;
+      }
+      return this.reduce((acc, curr) => acc + curr, 0);
+    };
+
+    Array.prototype.average = function () {
+      if (this.length === 0) {
+        return 0;
+      }
+      return this.sum() / this.length;
+    };
+  </script>
+
+  <p style="margin-top: 20px;">Instructions:</p>
+  <ul>
+    <li>Enter an array in the format <code>[element1, element2, ...]</code>.</li>
+    <li>Make sure to use square brackets and separate elements with commas.</li>
+    <li>Click the "Get Last Element" button to retrieve the last element of the array.</li>
+    <li>Click the "Get Max Element" button to retrieve the maximum element of the array.</li>
+    <li>Click the "Get Sum" button to retrieve the sum of all elements in the array.</li>
+    <li>Click the "Get Average" button to retrieve the average of all elements in the array.</li>
+    <li>Click the "Sort" button to sort the elements in the array.</li>
+    <li>Click the "Search" button to search for a specific value in the array.</li>
+    <li>Click the "Filter" button to filter the array based on a specific value.</li>
+    <li>Click the "Clear" button to reset the input field and clear the result/error messages.</li>
+    <li>Press <code>Ctrl + Z</code> to undo the last action.</li>
+    <li>Press <code>Ctrl + Y</code> to redo the last undone action.</li>
+  </ul>
+
+  <p class="disclaimer">These Array tools were inspired by a LeetCode challenge.</p>
+</body>
+
+</html>
